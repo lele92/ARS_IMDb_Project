@@ -7,7 +7,7 @@ import sys
 
 
 # plot_tie_strength_vs_neighbor_overlap(weights, neighbors_overlap)
-def plot_tie_strength_vs_neighbor_overlap(graph):
+def plot_tie_strength_vs_neighbor_overlap(graph, out):
     tie_strength = []
     neighbor_overlap = []
     for o, d, data in sorted(graph.edges(data=True), key=lambda (a, b, data): (data['weight'], data['NOverlap'])): # reverse=True per ordinare al contrario
@@ -17,12 +17,13 @@ def plot_tie_strength_vs_neighbor_overlap(graph):
     plt.plot(tie_strength, neighbor_overlap, ".", markersize=3, label='<O> single point')
     plt.plot(avg_x, avg_y, "rD", markersize=5, label='<O> points same Strength')
     plt.title("Tie Strength vs Neighbor Overlap", fontsize=15)
-    plt.xlabel("Tie Strength", fontsize=10, labelpad=-2)
-    plt.ylabel("Neighbor Overlap", fontsize=10, labelpad=-2)
+    plt.xlabel("Tie Strength", fontsize=10, labelpad=0)
+    plt.ylabel("Neighbor Overlap", fontsize=10, labelpad=0)
     plt.tick_params(axis='x', labelsize=9)
     plt.tick_params(axis='y', labelsize=9)
     # plt.loglog()
     plt.legend(numpoints=1, loc=0, fontsize="x-small")
+    plt.savefig(out+".jpg", bbox_inches="tight")
     plt.show()
 
 
@@ -46,7 +47,7 @@ def plot_link_removing_vs_len_largest_component(data):
         link_removed.append(item[0])
         len_largest_component.append(item[1])
 
-    plt.plot(link_removed, len_largest_component, ".", markersize=5, label='<O> single point')
+    plt.plot(link_removed, len_largest_component, "-.", markersize=5, label='<O> single point')
     plt.title("Removed Links vs Size of largest component", fontsize=15)
     plt.xlabel("Removed Links", fontsize=10, labelpad=0)
     plt.ylabel("Size of largest component", fontsize=10, labelpad=0)
@@ -57,7 +58,7 @@ def plot_link_removing_vs_len_largest_component(data):
     plt.show()
 
 
-def plot_link_removing_vs_len_largest_component(data_weak, data_strong):
+def plot_link_removing_vs_len_largest_component(data_weak, data_strong, out):
     link_removed_weak = []
     len_largest_component_weak = []
 
@@ -74,8 +75,8 @@ def plot_link_removing_vs_len_largest_component(data_weak, data_strong):
         link_removed_strong.append(item[0])
         len_largest_component_strong.append(item[1])
 
-    plt.plot(link_removed_weak, len_largest_component_weak, ".", markersize=3, label='Weak tie first')
-    plt.plot(link_removed_strong, len_largest_component_strong, "r.", markersize=3, label='Strong tie first')
+    plt.plot(link_removed_weak, len_largest_component_weak, "-", markersize=5, label='Weak tie first')
+    plt.plot(link_removed_strong, len_largest_component_strong, "r-", markersize=5, label='Strong tie first')
     plt.title("Removed Links vs Size of largest component", fontsize=15)
     plt.xlabel("Removed Links", fontsize=10, labelpad=0)
     plt.ylabel("Size of largest component", fontsize=10, labelpad=0)
@@ -83,6 +84,7 @@ def plot_link_removing_vs_len_largest_component(data_weak, data_strong):
     plt.tick_params(axis='y', labelsize=9)
     # plt.loglog()
     plt.legend(numpoints=1, loc=0, fontsize="x-small")
+    plt.savefig(out+".jpg", bbox_inches="tight")
     plt.show()
 
 
@@ -108,8 +110,8 @@ def calculate_neighbors_overlap(graph):
     nx.write_edgelist(graph, out_file, delimiter=",", data=('weight', 'NOverlap'))
 
 # procedure to eliminate weak link first
-def weak_tie_first_removing(graph, step):
-    weak_tie_first_output = "weak_tie_first_output_"+str(step)+".csv"
+def weak_tie_first_removing(graph, step, cut):
+    weak_tie_first_output = "weak_tie_first_output_"+str(step)+"_"+str(cut)+".csv"
     out_weak = open(weak_tie_first_output, "w")
     count_link_removed = 0
     for o, d, data in sorted(graph.edges(data=True), key=lambda (a, b, data): (data['weight'], data['NOverlap'])):
@@ -125,8 +127,8 @@ def weak_tie_first_removing(graph, step):
     out_weak.close()
 
 
-def strong_tie_first_removing(graph, step):
-    strong_tie_first_output = "strong_tie_first_output_"+str(step)+".csv"
+def strong_tie_first_removing(graph, step, cut):
+    strong_tie_first_output = "strong_tie_first_output_"+str(step)+"_"+str(cut)+".csv"
     strong_weak = open(strong_tie_first_output, "w")
     count_link_removed = 0
     for o, d, data in sorted(graph.edges(data=True), key=lambda (a, b, data): (data['weight'], data['NOverlap']), reverse=True):
@@ -144,24 +146,28 @@ def strong_tie_first_removing(graph, step):
 # graph = nx.read_edgelist(path, delimiter=',', nodetype=str, data=(('weight', float),))
 # calculate_neighbors_overlap(graph)
 
-# path = "actor_network_weighted_overlap.csv"
+# cut = "_cut3"
+# path = "actor_network_weighted_overlap"+str(cut)+".csv"
 # graph = nx.read_edgelist(path, delimiter=',', nodetype=str, data=(('weight', float), ('NOverlap', float)))
-# plot_tie_strength_vs_neighbor_overlap(graph)
+# plot_tie_strength_vs_neighbor_overlap(graph, out="Plot/tie_strength_vs_neighbor_overlap"+str(cut))
 
-# path = "actor_network_weighted_overlap.csv"
+# cut = "_cut3"
+# path = "actor_network_weighted_overlap"+str(cut)+".csv"
 # graph = nx.read_edgelist(path, delimiter=',', nodetype=str, data=(('weight', float), ('NOverlap', float)))
-# step = 50
-# strong_tie_first_removing(graph, step)
+# step = 100
+# weak_tie_first_removing(graph, step, cut)
 
-# path = "actor_network_weighted_overlap.csv"
+# cut = "_cut3"
+# path = "actor_network_weighted_overlap"+str(cut)+".csv"
 # graph = nx.read_edgelist(path, delimiter=',', nodetype=str, data=(('weight', float), ('NOverlap', float)))
-# step = 50
-# strong_tie_first_removing(graph, step)
+# step = 100
+# strong_tie_first_removing(graph, step, cut)
 
-# step = 50
-# path_weak = "weak_tie_first_output_"+str(step)+".csv"
-# path_strong = "strong_tie_first_output_"+str(step)+".csv"
-# weak_tie_first = open(path_weak)
-# strong_tie_first = open(path_strong)
-# # plot_link_removing_vs_len_largest_component(weak_tie_first)
-# plot_link_removing_vs_len_largest_component(weak_tie_first, strong_tie_first)
+cut = "_cut3"
+step = 100
+path_weak = "weak_tie_first_output_"+str(step)+"_"+str(cut)+".csv"
+path_strong = "strong_tie_first_output_"+str(step)+"_"+str(cut)+".csv"
+weak_tie_first = open(path_weak)
+strong_tie_first = open(path_strong)
+# plot_link_removing_vs_len_largest_component(weak_tie_first)
+plot_link_removing_vs_len_largest_component(weak_tie_first, strong_tie_first, out="Plot/link_removing_vs_len_largest_component"+str(cut))
