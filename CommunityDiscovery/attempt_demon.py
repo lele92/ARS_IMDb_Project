@@ -14,8 +14,8 @@ def find_communities_demon(network_path, epsilon_start, delta, attempt, min_comm
         epsilon += delta
 
 network_path = "../DATA/Network_data_final/actor_network_cleaned.csv"
-epsilon_start = 0
+epsilon_start = 0.61
 delta = 0.01
-attempt = 61
+attempt = 40
 min_community_size = 3  # per ora delta di default dell'algoritmo
 find_communities_demon(network_path, epsilon_start, delta, attempt, min_community_size)
