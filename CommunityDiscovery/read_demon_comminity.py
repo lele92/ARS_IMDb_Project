@@ -249,7 +249,7 @@ def evaluate_demon_attempt_by_internal_density(list_communities):
     return all_ponderate_density
 
 
-# plot_epsilon_dict()
+plot_epsilon_dict()
 # list_communities = read_all_demon_directory()
 list_communities = read_single_demon_attempt("demon_actor_34_0.34_3.txt")
 # list_communities = read_single_demon_attempt("demon_actor_39_1.0_3.txt")
