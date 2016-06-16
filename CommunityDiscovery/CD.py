@@ -95,18 +95,28 @@ def load_communities(path):
 
 def add_community_label(communities,output):
     input = "../DATA/Network_data_final/nodes.csv"
-    f = open(input, "r")
+    f_input = open(input, "r")
+    f_output = open(output, "a")
     nodes = []
-    for i in f:
-        nodes.append(i)
+    for i in f_input:
+        nodes.append(i.replace('\n', ''))
 
     for n in nodes:
-       found_communities = find_in_communities(communities,n)     # occhio agli zeri
+        found_communities = find_in_communities(communities,n)     # occhio agli zeri
+        node_community_label = ','.join(found_communities)
+        line = "%s,%s\n" % (n, node_community_label)
+        f_output.write("%s" % line.encode('utf-8'))
+        f_output.flush()
 
-def find_in_communities(communities,n):
-    print communities
-    for comm in communities:
-        print comm #todo: finire
+    f_output.close()
+
+def find_in_communities(communities,actor):
+    correct_actor = "0" * (7 - len(actor)) + actor
+    found_communities = []
+    for i in communities:
+        if correct_actor in communities[i]:
+            found_communities.append(i)
+    return found_communities
 
 def read_all_k_clique_directory(log_directory="OutputKCLIQUE/"):
     list_communities = {}
@@ -243,7 +253,7 @@ path_actor = "../DATA/File_IMDb/actor_full_genre_cleaned.json"
 file_actor = open(path_actor).read()
 actors_data = json.loads(file_actor)
 
-# list_communities = read_all_k_clique_directory()
+list_communities = read_all_k_clique_directory()
 # # list_communities = read_single_demon_attempt("demon_actor_34_0.34_3.txt")
 # print len(list_communities)
 # all_ponderate_purities, all_unique_label = evaluate_demon_attempt_by_genre(list_communities)
@@ -255,14 +265,14 @@ actors_data = json.loads(file_actor)
 # for epsilon in list_communities:
 #     plot_overlap_distribution(list_communities[epsilon], epsilon)
 
-list_communities = read_all_louvain_directory()
+# list_communities = read_all_louvain_directory()
 # # list_communities = read_single_demon_attempt("demon_actor_34_0.34_3.txt")
 # print len(list_communities)
-all_ponderate_purities, all_unique_label = evaluate_demon_attempt_by_genre(list_communities)
-plot_general_barchart(sorted(all_ponderate_purities.iteritems(), key=lambda (k, v): v), "k", "Purity", "Purity Distribution Louvain based on Actor Genre", "purity_distribution_louvain_communities_on_genre")
+# all_ponderate_purities, all_unique_label = evaluate_demon_attempt_by_genre(list_communities)
+# plot_general_barchart(sorted(all_ponderate_purities.iteritems(), key=lambda (k, v): v), "k", "Purity", "Purity Distribution Louvain based on Actor Genre", "purity_distribution_louvain_communities_on_genre")
 
-for key, value in sorted(all_unique_label.iteritems(), key=lambda (k, v): len(v)):
-    print "k: "+str(key)+" Unique Label: "+str(value)
+# for key, value in sorted(all_unique_label.iteritems(), key=lambda (k, v): len(v)):
+#     print "k: "+str(key)+" Unique Label: "+str(value)
 
 path_actor_network = "../DATA/Network_data_final/actor_network_cleaned.csv"
 path_weighted_actor_network = "../DATA/Network_data_final/actor_network_weighted.csv"
@@ -303,5 +313,5 @@ k_range3 = list(range(15,18))
 # load_louvain_communities("cut3")
 # load_louvain_communities("cut4")
 
-# add_community_label(load_communities("OutputLOUVAIN/2_louvain.txt"),"nodesWithCommunity.csv")
+add_community_label(load_communities("OutputLOUVAIN/2_louvain.txt"), "nodesWithCommunity.csv")
 
