@@ -70,50 +70,51 @@ list_film = []
 list_percentage = []
 count = 0
 for tmp in actors_data:
-    actor_genres = {}
-    actor_languages = {}
-    for film in actors_data[tmp]["film"]:
-        if film in films_data:
-            genres = films_data[film]["genres"]
-            if genres is not None:
-                for g in genres:
-                    if g in actor_genres:
-                        actor_genres[g] += 1
-                    else:
-                        actor_genres[g] = 1
-            languages = films_data[film]["languages"]
-            languages = np.unique(languages).tolist()
-            if languages is not None:
-                for l in languages:
-                    if l in actor_languages:
-                        actor_languages[l] += 1
-                    else:
-                        actor_languages[l] = 1
+    if actors_data[tmp]["birth date"] is not None and actors_data[tmp]["award"]:
+        actor_genres = {}
+        actor_languages = {}
+        for film in actors_data[tmp]["film"]:
+            if film in films_data:
+                genres = films_data[film]["genres"]
+                if genres is not None:
+                    for g in genres:
+                        if g in actor_genres:
+                            actor_genres[g] += 1
+                        else:
+                            actor_genres[g] = 1
+                languages = films_data[film]["languages"]
+                languages = np.unique(languages).tolist()
+                if languages is not None:
+                    for l in languages:
+                        if l in actor_languages:
+                            actor_languages[l] += 1
+                        else:
+                            actor_languages[l] = 1
+            else:
+                list_film.append(film)
+                print film
+
+
+        actor_genres = sorted(actor_genres.iteritems(), key=lambda (k, v): v, reverse=True)[:3]
+        actor_languages = sorted(actor_languages.iteritems(), key=lambda (k, v): v, reverse=True)[:3]
+        actors_data[tmp]["top_genre"] = actor_genres[0][0]
+        actors_data[tmp]["top_language"] = actor_languages[0][0]
+
+
+        if actors_data[tmp]["top_genre"] in top_genre_distribution:
+            top_genre_distribution[actors_data[tmp]["top_genre"]] += 1
         else:
-            list_film.append(film)
-            print film
+            top_genre_distribution[actors_data[tmp]["top_genre"]] = 1
 
+        if actors_data[tmp]["top_language"] in top_language_distribution:
+            top_language_distribution[actors_data[tmp]["top_language"]] += 1
+        else:
+            top_language_distribution[actors_data[tmp]["top_language"]] = 1
 
-    actor_genres = sorted(actor_genres.iteritems(), key=lambda (k, v): v, reverse=True)[:3]
-    actor_languages = sorted(actor_languages.iteritems(), key=lambda (k, v): v, reverse=True)[:3]
-    actors_data[tmp]["top_genre"] = actor_genres[0][0]
-    actors_data[tmp]["top_language"] = actor_languages[0][0]
-
-
-    if actors_data[tmp]["top_genre"] in top_genre_distribution:
-        top_genre_distribution[actors_data[tmp]["top_genre"]] += 1
-    else:
-        top_genre_distribution[actors_data[tmp]["top_genre"]] = 1
-
-    if actors_data[tmp]["top_language"] in top_language_distribution:
-        top_language_distribution[actors_data[tmp]["top_language"]] += 1
-    else:
-        top_language_distribution[actors_data[tmp]["top_language"]] = 1
-
-    actors_data[tmp]["top3_genre"] = []
-    for key, value in actor_genres:
-        actors_data[tmp]["top3_genre"].append(key)
-    list_percentage.append((float(actor_genres[0][1])/float(len(actors_data[tmp]["film"])))*100)
+        actors_data[tmp]["top3_genre"] = []
+        for key, value in actor_genres:
+            actors_data[tmp]["top3_genre"].append(key)
+        list_percentage.append((float(actor_genres[0][1])/float(len(actors_data[tmp]["film"])))*100)
     # list_percentage.append((float(actor_languages[0][1])/float(len(actors_data[tmp]["film"])))*100)
     # sys.exit()
 
@@ -124,21 +125,29 @@ for tmp in actors_data:
     #     sys.exit()
     # count += 1
 
-
+# path_actor_final = "../DATA/File_IMDb/actor_full_genre_cleaned.json"
+# file_actor = open(path_actor_final).read()
+# actors_data = json.loads(file_actor)
+# for tmp in actors_data:
+#     if actors_data[tmp]["birth date"] is not None and len(actors_data[tmp]["birth date"]) > 4:
+#         tmp_data = actors_data[tmp]["birth date"].split("-")[2]
+#         actors_data[tmp]["birth date"] = "19" + tmp_data
+#         print actors_data[tmp]["birth date"]
+#
 # out = open("../DATA/File_IMDb/actor_full_genre_cleaned.json", "w")
 # out.write(json.dumps(actors_data, indent=4))
 # out.close()
 
-print max(list_percentage)
-print min(list_percentage)
-print reduce(lambda x, y: x + y, list_percentage) / len(list_percentage)
-print len(list_percentage)
-print sorted(list_percentage)[-5:]
-print np.median(np.array(list_percentage))
+# print max(list_percentage)
+# print min(list_percentage)
+# print reduce(lambda x, y: x + y, list_percentage) / len(list_percentage)
+# print len(list_percentage)
+# print sorted(list_percentage)[-5:]
+# print np.median(np.array(list_percentage))
 # plot_genres_distribution(top_language_distribution, "Top Language Distribution", "Plot/top_language_distribution.jpg")
 # plot_distances_distribution(list_percentage, "Top Language Percentage for Actor", "Plot/top_language_fitting_percentage.jpg")
 
-plot_genres_distribution(top_genre_distribution, "Top Genre Distribution", "Plot/top_genre_distribution.jpg")
+# plot_genres_distribution(top_genre_distribution, "Top Genre Distribution", "Plot/top_genre_distribution.jpg")
 plot_distances_distribution(list_percentage, "Top Genre Percentage for Actor", "Plot/top_genre_fitting_percentage.jpg")
 
 # out = open("../DATA/Indexes/film_mancanti.csv", "w")
