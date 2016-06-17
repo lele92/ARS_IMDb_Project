@@ -255,12 +255,6 @@ def evaluate_demon_attempt_by_genre(list_communities):
     path = "../DATA/Network_data_final/actor_network_cleaned.csv"
     graph = nx.read_edgelist(path, delimiter=',', nodetype=str)
 
-    all_ponderate_purities = {}
-    all_arithmetic_purities = {}
-    all_unique_label = {}
-    all_label = {}
-
-
     for epsilon in list_communities:
         print epsilon
         purezza = []
@@ -284,25 +278,15 @@ def evaluate_demon_attempt_by_genre(list_communities):
                 "percentage_birth": percentage_birth,
                 "mean_year_actor": mean_year_actor
             }
-        mean_purezza = reduce(lambda x, y: x + y, purezza) / len(purezza)
-        media_ponderata = 0
 
         out_path = "DEMONResults/demon_result_"+str(epsilon)+"_"+str(min_community_size)+".csv"
         out = open(out_path, "w")
-        for item in sorted(all_measure, key=lambda (item): (all_measure[item]["len"]), reverse=True):
-            media_ponderata += float(all_measure[item]["len"]) * float(all_measure[item]["purity"])
+        for item in sorted(all_measure, key=lambda (item): (all_measure[item]["len"]), reverse=True):            
             res = "%s,%s,%s,%s,%s,%s,%s,%s\n" % (item, all_measure[item]["len"], all_measure[item]["purity"], all_measure[item]["density"], all_measure[item]["label"], all_measure[item]["birth_date"], all_measure[item]["percentage_birth"], all_measure[item]["mean_year_actor"])
             out.write("%s" % res.encode('utf-8'))
             out.flush()
-        media_ponderata /= float(total_length)
 
         out.close()
-        all_arithmetic_purities[epsilon] = mean_purezza
-        all_ponderate_purities[epsilon] = media_ponderata
-        all_unique_label[epsilon] = np.unique(labels).tolist()
-        all_label[epsilon] = labels
-
-    return all_ponderate_purities, all_label
 
 
 def compute_global_statistics_DEMON_attempt(list_communities):
@@ -373,21 +357,21 @@ def compute_global_statistics_DEMON_attempt(list_communities):
 
 # plot_epsilon_dict(out="number_of_community_distribution")
 # list_communities = read_all_demon_directory()
-# epsilon = 0.32
-# list_communities_result = read_single_demon_result("demon_result_0.32_3.csv")
+epsilon = 0.32
+list_communities_result = read_single_demon_result("demon_result_0.32_3.csv")
 # list_communities = read_single_demon_attempt("demon_actor_39_1.0_3.txt")
 # for epsilon in list_communities:
 #     plot_communities_length_distribution(list_communities[epsilon], "Distribution community size Epsilon: "+str(epsilon), "community_size_distribution_"+str(epsilon))
 
-path_actor = "../DATA/File_IMDb/actor_full_genre_cleaned.json"
-file_actor = open(path_actor).read()
-actors_data = json.loads(file_actor)
+# path_actor = "../DATA/File_IMDb/actor_full_genre_cleaned.json"
+# file_actor = open(path_actor).read()
+# actors_data = json.loads(file_actor)
 
-list_communities = read_all_demon_directory()
+# list_communities = read_all_demon_directory()
 # epsilon = 0.32
 # list_communities = read_single_demon_attempt("demon_actor_32_"+str(epsilon)+"_3.txt")
-print len(list_communities)
-all_ponderate_purities, labels = evaluate_demon_attempt_by_genre(list_communities)
+# print len(list_communities)
+# evaluate_demon_attempt_by_genre(list_communities)
 # horizontal_barchar(labels[epsilon])
 # plot_general_barchart(sorted(all_ponderate_purities.iteritems(), key=lambda (k, v): v), "Epsilon", "Purity", "Purity Distribution DEMON based on Actor Genre", "purity_distribution_demon_communities_on_genre", highlight=32)
 
@@ -413,5 +397,3 @@ all_ponderate_purities, labels = evaluate_demon_attempt_by_genre(list_communitie
 # # plot the length of the different community in a specific epsilon
 # for epsilon in global_statistics["lenghts"]:
 #     plot_communities_length_distribution(global_statistics["lenghts"][epsilon], "Distribution community size Epsilon: "+str(epsilon), "community_size_distribution_"+str(epsilon))
-
-# horizontal_barchar(global_statistics["labels"][epsilon])

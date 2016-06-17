@@ -95,18 +95,28 @@ def load_communities(path):
 
 def add_community_label(communities,output):
     input = "../DATA/Network_data_final/nodes.csv"
-    f = open(input, "r")
+    f_input = open(input, "r")
+    f_output = open(output, "a")
     nodes = []
-    for i in f:
-        nodes.append(i)
+    for i in f_input:
+        nodes.append(i.replace('\n', ''))
 
     for n in nodes:
-       found_communities = find_in_communities(communities,n)     # occhio agli zeri
+        found_communities = find_in_communities(communities,n)     # occhio agli zeri
+        node_community_label = ','.join(found_communities)
+        line = "%s,%s\n" % (n, node_community_label)
+        f_output.write("%s" % line.encode('utf-8'))
+        f_output.flush()
 
-def find_in_communities(communities,n):
-    print communities
-    for comm in communities:
-        print comm #todo: finire
+    f_output.close()
+
+def find_in_communities(communities,actor):
+    correct_actor = "0" * (7 - len(actor)) + actor
+    found_communities = []
+    for i in communities:
+        if correct_actor in communities[i]:
+            found_communities.append(i)
+    return found_communities
 
 def read_all_k_clique_directory(log_directory="OutputKCLIQUE/"):
     list_communities = {}
@@ -140,7 +150,7 @@ def evaluate_demon_attempt_by_genre(list_communities):
         for community in list_communities[epsilon]:
             total_length += len(community)
         for community in list_communities[epsilon]:
-            p, label = evaluate_purity_single_community(community)
+            p, label = evaluate_single_community(community)
             purezza.append(p)
             labels.append(label)
             all_lenght[count] = {
@@ -165,36 +175,51 @@ def evaluate_demon_attempt_by_genre(list_communities):
 
     return all_ponderate_purities, all_unique_label
 
-def evaluate_purity_single_community(community_list):
-    community_genre = None
+def evaluate_single_community(community_list, graph):
+    community_label = None
     actors_genres = []
+    right_community_items = []
     for item in community_list:
         right_item = "0"*(7-len(item))+item
         actors_genres.append(actors_data[right_item]["top_genre"])
+        right_community_items.append(right_item)
         # print actors_genres
     data = Counter(actors_genres)
     community_label = data.most_common(1)[0]
     # print community_label
     purezza = float(community_label[1])/float(len(community_list))*100
-    return purezza, community_label[0]
+    subgraph_community = graph.subgraph(right_community_items)
+    density = nx.density(subgraph_community)
+    return purezza, community_label[0], density
 
-def plot_general_barchart(data, x_label, y_label, title, out):
+def plot_general_barchart(data, x_label, y_label, title, out, highlight=None):
     x = []
     freq = []
     for key, value in sorted(data):
         x.append(key)
         freq.append(value)
-    histogram(x, freq, x_label, y_label, title, out)
+    histogram(x, freq, x_label, y_label, title, out, highlight)
 
-def histogram(x, freq, xlabel=None, ylabel=None, title=None, out=None):
-    for i in range(0,len(x)-1):
-        if (i%5 != 0):
-            x[i] = ""
+def histogram(x, freq, xlabel=None, ylabel=None, title=None, out=None, highlight=None):
+    # for i in range(0,len(x)-1):
+    #     if (i%10 != 0):
+    #         x[i] = ""
 
-    plt.bar(range(len(freq)), freq, color='g', alpha=0.6, linewidth=0)
-    plt.xticks(range(len(x)), x, size='small', rotation='vertical')
-    # plt.axis([0, 41, 0, 300])
+    barlist = plt.bar(range(len(freq)), freq, color='b', alpha=0.6, linewidth=0, align='center')
+
+    if highlight is not None:
+        barlist[highlight].set_color('r')
+        rect = barlist[highlight]
+        height = rect.get_height()
+        width = rect.get_width()
+        plt.text(rect.get_x() + width/2., height+1, "%.2f%%" % float(height), ha='center', va='center')
+
+    plt.xticks(range(len(x)), x, size='x-small', rotation='vertical', ha='center', va='top')
+    plt.tick_params(axis='y', labelsize='x-small')
+    plt.xlim([0-barlist[0].get_width(), len(freq)])
+    # plt.axis([-0.5,40.5, 0, 300])
     plt.title(title)
+    plt.gca().yaxis.grid(True)
 
     if (xlabel != None and ylabel != None):
         plt.xlabel(xlabel)
@@ -238,6 +263,167 @@ def plot_overlap_distribution(communities, epsilon):
     plt.savefig("Plot/overlap_distribution_"+str(epsilon)+"_clique.jpg", bbox_inches="tight")
     plt.show()
 
+def evaluate_CDalgorithm_attempt_by_genre(list_communities):
+
+    path = "../DATA/Network_data_final/actor_network_cleaned.csv"
+    graph = nx.read_edgelist(path, delimiter=',', nodetype=str)
+
+    for epsilon in list_communities:
+        print epsilon
+        purezza = []
+        all_measure = {}
+        labels = []
+        total_length = 0
+        count = 0
+        for community in list_communities[epsilon]:
+            total_length += len(community)
+        for community in list_communities[epsilon]:
+            p, label, density = evaluate_single_community(community, graph)
+            purezza.append(p)
+            labels.append(label)
+
+            all_measure[count] = {
+                "len": len(community),
+                "purity": p,
+                "label": label,
+                "density": density
+            }
+            count += 1
+
+        out_path = "KCLIQUEResult/kclique_result_"+str(epsilon)+"_k.csv"
+        out = open(out_path, "w")
+        for item in sorted(all_measure, key=lambda (item): (all_measure[item]["len"]), reverse=True):
+            res = "%s,%s,%s,%s,%s\n" % (item, all_measure[item]["len"], all_measure[item]["purity"], all_measure[item]["density"], all_measure[item]["label"])
+            out.write("%s" % res.encode('utf-8'))
+            out.flush()
+
+        out.close()
+
+def compute_global_statistics_CDalgorithm(list_communities):
+
+    all_ponderate_density = {}
+    all_ponderate_purities = {}
+    all_arithmetic_density = {}
+    all_arithmetic_purities = {}
+    all_unique_label = {}
+    all_label = {}
+    all_lenghts = {}
+
+    for epsilon in list_communities:
+        print epsilon
+        labels = []
+        all_lenght = []
+        total_length = 0
+        all_statistic_measure = list_communities[epsilon]
+
+        ponderate_mean_purity = 0
+        mean_purity = 0
+        ponderate_mean_density = 0
+        mean_density = 0
+        for community in all_statistic_measure:
+            total_length += all_statistic_measure[community]["len"]
+            ponderate_mean_density += float(all_statistic_measure[community]["len"]) * float(all_statistic_measure[community]["density"])
+            ponderate_mean_purity += float(all_statistic_measure[community]["len"]) * float(all_statistic_measure[community]["p"])
+            mean_purity += float(all_statistic_measure[community]["p"])
+            mean_density += float(all_statistic_measure[community]["density"])
+            labels.append(all_statistic_measure[community]["label"])
+            all_lenght.append(all_statistic_measure[community]["len"])
+
+        mean_density /= float(total_length)
+        mean_purity /= float(total_length)
+        ponderate_mean_density /= float(total_length)
+        ponderate_mean_purity /= float(total_length)
+
+        all_arithmetic_density[epsilon] = mean_density
+        all_ponderate_density[epsilon] = ponderate_mean_density
+        all_arithmetic_purities[epsilon] = mean_purity
+        all_ponderate_purities[epsilon] = ponderate_mean_purity
+        all_unique_label[epsilon] = np.unique(labels).tolist()
+        all_label[epsilon] = labels
+        all_lenghts[epsilon] = all_lenght
+
+    # global statistics object contains in a statistic keyword (such as arithmetic_density)
+    # an object that have different object inside them, one for every epsilon (k in k-clique)
+    # with the right parameter for the evaluation of the parameter.
+    # For Example:
+    # global_statistics {
+    #   "arithmetic_density" : {
+    #        0.12 : "value of arithmetic density of the community discover with epsilon 0.12 in DEMON"
+    #        0.37 : "value of arithmetic density of the community discover with epsilon 0.37 in DEMON"
+    #
+    # for the labels we have an array of labels that represent every label of the communities discovered
+    # with a certain parameter epsilon in order to plot them with an horizontal barchart
+    global_statistics = {}
+    global_statistics["arithmetic_density"] = all_arithmetic_density
+    global_statistics["ponderate_density"] = all_ponderate_density
+    global_statistics["arithmetic_purity"] = all_arithmetic_purities
+    global_statistics["ponderate_purity"] = all_ponderate_purities
+    global_statistics["unique_labels"] = all_unique_label
+    global_statistics["labels"] = all_label
+    global_statistics["lenghts"] = all_lenghts
+
+    return global_statistics
+
+def read_directory_result(log_directory):
+    list_communities = {}
+    dict_list = os.listdir(log_directory)
+    dict_list.sort()
+    for d in dict_list:
+        list_communities[float(d.split("_")[2])] = read_single_file_result(log_directory + d)
+    # contains an object for every epsilon with information about every community discover
+    return list_communities
+
+def read_single_file_result(demon_result_path):
+    f = open(demon_result_path)
+    all_community_measure = {}
+    for l in f:
+        u = l.rstrip().split(",")
+        all_community_measure[u[0]] = {
+            "len": float(u[1]),
+            "p": float(u[2]),
+            "density": float(u[3]),
+            "label": u[4]
+        }
+
+    return all_community_measure
+
+def plot_epsilon_dict(log_directory, out=None):
+    l = {}
+    dict_list = os.listdir(log_directory)
+    dict_list.sort()
+    for d in dict_list:
+        l[float(d.split("_")[0])] = len(load_communities(log_directory +d))
+    x = []
+    freq = []
+    for i in sorted(l):
+        x.append(i)
+        freq.append(l[i])
+    histogram(x, freq, "k", "Number of communities", title="Number of Communities vs k K-CLIQUE", out=out)
+
+def read_single_result(path):
+    log_directory = "KCLIQUEResult/"
+    list_communities = {}
+    list_communities[float(path.split("_")[2])] = read_single_file_result(log_directory + path)
+    return list_communities
+
+def plot_communities_length_distribution(lengths, title, out):
+    # lengths = []
+    # for community in communities:
+    #     lengths.append(len(community))
+
+    lengths.sort()
+    x = list(range(0, len(lengths)))
+    plt.plot(x, lengths, "-", linewidth=2)
+    plt.title(title, fontsize=15)
+    plt.xlabel("CommunityID", fontsize=10, labelpad=0)
+    plt.ylabel("Community Size", fontsize=10, labelpad=0)
+    plt.tick_params(axis='x', labelsize=9)
+    plt.tick_params(axis='y', labelsize=9)
+    plt.xlim([0, len(lengths)])
+    plt.gca().yaxis.grid(True)
+    plt.savefig("Plot/"+out+".jpg", bbox_inches="tight")
+    # plt.legend(numpoints=1, loc=0, fontsize="x-small")
+    plt.show()
 
 path_actor = "../DATA/File_IMDb/actor_full_genre_cleaned.json"
 file_actor = open(path_actor).read()
@@ -255,14 +441,14 @@ actors_data = json.loads(file_actor)
 # for epsilon in list_communities:
 #     plot_overlap_distribution(list_communities[epsilon], epsilon)
 
-list_communities = read_all_louvain_directory()
+# list_communities = read_all_louvain_directory()
 # # list_communities = read_single_demon_attempt("demon_actor_34_0.34_3.txt")
 # print len(list_communities)
-all_ponderate_purities, all_unique_label = evaluate_demon_attempt_by_genre(list_communities)
-plot_general_barchart(sorted(all_ponderate_purities.iteritems(), key=lambda (k, v): v), "k", "Purity", "Purity Distribution Louvain based on Actor Genre", "purity_distribution_louvain_communities_on_genre")
+# all_ponderate_purities, all_unique_label = evaluate_demon_attempt_by_genre(list_communities)
+# plot_general_barchart(sorted(all_ponderate_purities.iteritems(), key=lambda (k, v): v), "k", "Purity", "Purity Distribution Louvain based on Actor Genre", "purity_distribution_louvain_communities_on_genre")
 
-for key, value in sorted(all_unique_label.iteritems(), key=lambda (k, v): len(v)):
-    print "k: "+str(key)+" Unique Label: "+str(value)
+# for key, value in sorted(all_unique_label.iteritems(), key=lambda (k, v): len(v)):
+#     print "k: "+str(key)+" Unique Label: "+str(value)
 
 path_actor_network = "../DATA/Network_data_final/actor_network_cleaned.csv"
 path_weighted_actor_network = "../DATA/Network_data_final/actor_network_weighted.csv"
@@ -294,6 +480,27 @@ k_range3 = list(range(15,18))
 # k_clique_CD(actor_network_cut3, "cut3", k_range)       # occhio che con questa esplode tutto
 # k_clique_CD(actor_network_cut4, "cut4", k_range1)
 # load_k_clique_communities("cut4", k_range1)
+# communities_list = read_all_k_clique_directory()
+# evaluate_CDalgorithm_attempt_by_genre(communities_list)
+
+# I read the result file of the execution of community discover algorithm
+# list_communities_result = read_directory_result(log_directory="KCLIQUEResult/")
+# now in global_statistics I have all the statistic for every parameter with I execute community discovery task (epsilon in DEMON or K in k-clique)
+# global_statistics = compute_global_statistics_CDalgorithm(list_communities_result)
+
+# plotting of the ponderate density over every epsilon
+# plot_general_barchart(global_statistics["ponderate_density"].iteritems(), "K", "Density", "Ponderate Density Distribution K-CLIQUE communities", "density_distribution_k_clique_communities")
+
+# plotting of the ponderate purity over every epsilon
+# plot_general_barchart(global_statistics["ponderate_purity"].iteritems(), "k", "Purity", "Purity Distribution K-CLIQUE based on Actor Genre", "purity_distribution_k_clique_communities_on_genre") #, highlight=32
+
+# plot the length of the different community in a specific k
+k = 5.0
+list_communities_result = read_single_result("kclique_result_"+str(k)+"_k.csv")
+global_statistics = compute_global_statistics_CDalgorithm(list_communities_result)
+plot_communities_length_distribution(global_statistics["lenghts"][k], "Distribution community size K: "+str(k), "community_size_distribution_"+str(k))
+
+# plot_epsilon_dict(log_directory="OutputKCLIQUE/", out="number_of_community_distribution_k_clique")
 
 # Louvain analysis
 # louvain_CD(actor_network, "cut2")
@@ -303,5 +510,5 @@ k_range3 = list(range(15,18))
 # load_louvain_communities("cut3")
 # load_louvain_communities("cut4")
 
-# add_community_label(load_communities("OutputLOUVAIN/2_louvain.txt"),"nodesWithCommunity.csv")
+# add_community_label(load_communities("OutputLOUVAIN/2_louvain.txt"), "nodesWithCommunity.csv")
 
