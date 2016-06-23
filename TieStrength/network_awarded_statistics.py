@@ -1,4 +1,7 @@
-__author__ = 'Trappola'
+# -*- coding: utf-8 -*-
+__author__ = 'Matteo Borghi, Raffaele Giannella'
+__license__ = "GPL"
+__email__ = "matteo.borghi20@gmail.com, raph.giannella@gmail.com"
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -54,6 +57,61 @@ def oscar_winner_check(awards):
         if award["type"] == "Oscar" and award["outcome"] == "Won":
             is_oscar_winner = True
     return is_oscar_winner
+
+
+def assign_award_category_actor():
+    actors_oscar = []
+    for tmp in graph.nodes():
+        for award in actors_data[tmp]["award"]:
+            if award["type"] == "Oscar" and award["outcome"] == "Won":
+                actors_oscar.append(tmp)
+                graph.remove_node(tmp)
+                actors_data[tmp]["award_category"] = "Oscar"
+                break
+
+    actors_oscar_nomination = []
+    for tmp in graph.nodes():
+        for award in actors_data[tmp]["award"]:
+            if award["type"] == "Oscar":
+                actors_oscar_nomination.append(tmp)
+                graph.remove_node(tmp)
+                actors_data[tmp]["award_category"] = "NominationOscar"
+                break
+
+    actors_winning = []
+    for tmp in graph.nodes():
+        for award in actors_data[tmp]["award"]:
+            if (award["type"] == "Golden Globe" and award["outcome"] == "Won") or \
+                (award["type"] == "BAFTA Film Award" and award["outcome"] == "Won") or\
+                (award["type"] == "Golden Lion" and award["outcome"] == "Won") or\
+                ("grand jury" in award["type"] and award["outcome"] == "Won") or\
+                (award["type"] == "Palme d'Or" and award["outcome"] == "Won") or\
+                (award["type"] == "Golden Berlin Bear" and award["outcome"] == "Won") or\
+                (award["type"] == "Filmfare Award" and award["outcome"] == "Won") or\
+                (award["type"] == "European Film Award" and award["outcome"] == "Won") or\
+                (award["type"] == "Golden Leopard" and award["outcome"] == "Won"):# or\
+                # (award["type"] == "Primetime Emmy" and award["outcome"] == "Won"):
+                actors_winning.append(tmp)
+                graph.remove_node(tmp)
+                actors_data[tmp]["award_category"] = "Winning"
+                break
+
+    for tmp in graph.nodes():
+        actors_data[tmp]["award_category"] = "GenericNomination"
+
+    # out = open("../DATA/File_IMDb/actor_full_genre_cleaned.json", "w")
+    # out.write(json.dumps(actors_data, indent=4))
+    # out.close()
+
+    #     # if actors_data[tmp]["birth date"] is not None and actors_data[tmp]["award"]:
+    #     #     # print actors_data[tmp]["birth date"]
+    #     #     # len_film.append(int(actors_data[tmp]["birth date"]))
+    #     #     len_film.append(len(actors_data[tmp]["top_genre"]))
+    #
+    print "Number of Actor Oscar: "+str(len(actors_oscar))
+    print "Number of Actor Nominated for Oscar: "+str(len(actors_oscar_nomination))
+    print "Number of Actor Winning a prestigious Award: "+str(len(actors_winning))
+    print "Number of Actor with general Nomination: "+str(len(graph.nodes()))
 
 
 # cut = "cut3"
@@ -152,6 +210,8 @@ count_awarded = 0
 # graph = nx.read_edgelist(path, delimiter=',', nodetype=str, data=(('weight', float),))
 
 oscar_candidate = open("oscar_candidate.txt", 'w')
+oscar_candidate_id = open("oscar_candidate_id.txt", 'w')
+oscar_candidate_ids = []
 
 for tmp in graph.nodes():
     # tmp = "0000906"
@@ -174,6 +234,8 @@ for tmp in graph.nodes():
             string_data = tmp +","+str(age)+","+str(num_oscar_nomination)+","+str(second_level_won)+","+str(num_generical_award)+","+actors_data[tmp]["name"]+","+actors_data[tmp]["top_director"]+","+str(actors_data[tmp]["top_directors_dict"])+"\n"
             print tmp +","+str(age)+","+str(num_oscar_nomination)+","+str(second_level_won)+","+str(num_generical_award)+","+actors_data[tmp]["name"]
             oscar_candidate.write(string_data)
+            oscar_candidate_ids.append(tmp)
+            # oscar_candidate_id.write(tmp+"\n")
             # print actors_data[tmp]["name"] +" "+ tmp
             count_awarded += 1
         # sys.exit()
@@ -182,58 +244,8 @@ for tmp in graph.nodes():
         # actors_data[tmp]["award_category"] = "Oscar"
         # break
 oscar_candidate.close()
+oscar_candidate_id.write(str(oscar_candidate_ids))
+oscar_candidate_id.close()
 print count_node
 print count_awarded
 
-actors_oscar = []
-for tmp in graph.nodes():
-    for award in actors_data[tmp]["award"]:
-        if award["type"] == "Oscar" and award["outcome"] == "Won":
-            actors_oscar.append(tmp)
-            graph.remove_node(tmp)
-            actors_data[tmp]["award_category"] = "Oscar"
-            break
-
-actors_oscar_nomination = []
-for tmp in graph.nodes():
-    for award in actors_data[tmp]["award"]:
-        if award["type"] == "Oscar":
-            actors_oscar_nomination.append(tmp)
-            graph.remove_node(tmp)
-            actors_data[tmp]["award_category"] = "NominationOscar"
-            break
-
-actors_winning = []
-for tmp in graph.nodes():
-    for award in actors_data[tmp]["award"]:
-        if (award["type"] == "Golden Globe" and award["outcome"] == "Won") or \
-            (award["type"] == "BAFTA Film Award" and award["outcome"] == "Won") or\
-            (award["type"] == "Golden Lion" and award["outcome"] == "Won") or\
-            ("grand jury" in award["type"] and award["outcome"] == "Won") or\
-            (award["type"] == "Palme d'Or" and award["outcome"] == "Won") or\
-            (award["type"] == "Golden Berlin Bear" and award["outcome"] == "Won") or\
-            (award["type"] == "Filmfare Award" and award["outcome"] == "Won") or\
-            (award["type"] == "European Film Award" and award["outcome"] == "Won") or\
-            (award["type"] == "Golden Leopard" and award["outcome"] == "Won"):# or\
-            # (award["type"] == "Primetime Emmy" and award["outcome"] == "Won"):
-            actors_winning.append(tmp)
-            graph.remove_node(tmp)
-            actors_data[tmp]["award_category"] = "Winning"
-            break
-
-for tmp in graph.nodes():
-    actors_data[tmp]["award_category"] = "GenericNomination"
-
-out = open("../DATA/File_IMDb/actor_full_genre_cleaned.json", "w")
-out.write(json.dumps(actors_data, indent=4))
-out.close()
-
-#     # if actors_data[tmp]["birth date"] is not None and actors_data[tmp]["award"]:
-#     #     # print actors_data[tmp]["birth date"]
-#     #     # len_film.append(int(actors_data[tmp]["birth date"]))
-#     #     len_film.append(len(actors_data[tmp]["top_genre"]))
-#
-print "Number of Actor Oscar: "+str(len(actors_oscar))
-print "Number of Actor Nominated for Oscar: "+str(len(actors_oscar_nomination))
-print "Number of Actor Winning a prestigious Award: "+str(len(actors_winning))
-print "Number of Actor with general Nomination: "+str(len(graph.nodes()))

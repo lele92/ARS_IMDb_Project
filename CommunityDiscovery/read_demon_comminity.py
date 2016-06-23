@@ -11,9 +11,13 @@ from collections import Counter
 
 min_community_size = 3
 RESULT_DIRECTORY = "Demon_Award_Result"
+# RESULT_DIRECTORY = "DEMONResults"
 OUTPUT_DIRECTORY = "OutputDemon_Award"
+# OUTPUT_DIRECTORY = "OutputDemon"
 GRAPH_PATH = "../DATA/Network_data_final/actor_network_cut3_awarded.csv"
+# GRAPH_PATH = "../DATA/Network_data_final/actor_network_cleaned.csv"
 PLOT_DIRECTORY = "PlotAward"
+# PLOT_DIRECTORY = "Old_plot"
 PATH_ACTOR = "../DATA/File_IMDb/actor_full_genre_cleaned.json"
 
 import numpy as np
@@ -101,7 +105,7 @@ def evaluate_purity_single_community(community_list, graph):
     data = Counter(actors_genres)
     # for item in data:
     #     data[item] = float(data[item])/float(len(community_list))
-    print data["Oscar"]
+    # print data["Oscar"]
     community_label = data.most_common(1)[0]
     # print community_label
     purezza = float(community_label[1])/float(len(community_list))*100
@@ -117,12 +121,13 @@ def evaluate_purity_single_community(community_list, graph):
 
     oscar_percentage = None
     if "Oscar" in data:
-        print data["Oscar"]
+        # print data["Oscar"]
         oscar_percentage = float(data["Oscar"])/float(len(community_list))*100
     return purezza, community_label[0], density, mean_birth_date, "%.2f" % percentage_birth_date, mean_year_actor, oscar_percentage
     # return purezza, data, density, mean_birth_date, "%.2f" % percentage_birth_date, mean_year_actor
 
-def horizontal_barchar(data):
+
+def horizontal_barchar(data, out):
     freq = {}
     tot_item = len(data)
     for item in data:
@@ -147,9 +152,12 @@ def horizontal_barchar(data):
         width = rect.get_width()
         bar_width = height
         width = "%.2f" % width
-        plt.text(5+float(width), rect.get_y() + height/2., "%.1f%%" % float(width), ha='center', va='center', fontsize=7)
+        plt.text(5+float(width), rect.get_y() + height/2., "%.1f%%" % float(width), ha='center', va='center', fontsize=10)
+    plt.tick_params(axis='x', labelsize=9)
+    plt.tick_params(axis='y', labelsize=9)
     plt.axis([0, max_width + 10, -0.5, len(labels)-0.5])
     plt.yticks(np.arange(len(labels)), labels, ha='right', va='center', size='small', rotation='horizontal')
+    plt.savefig(PLOT_DIRECTORY+"/"+out+".jpg", bbox_inches="tight")
     plt.show()
 
 
@@ -158,14 +166,14 @@ def histogram(x, freq, xlabel=None, ylabel=None, title=None, out=None, highlight
         if (i%10 != 0):
             x[i] = ""
 
-    barlist = plt.bar(range(len(freq)), freq, color='g', alpha=0.6, linewidth=0, align='center')
+    barlist = plt.bar(range(len(freq)), freq, color='b', alpha=0.6, linewidth=0, align='center')
 
     if highlight is not None:
         barlist[highlight].set_color('r')
         rect = barlist[highlight]
         height = rect.get_height()
         width = rect.get_width()
-        # plt.text(rect.get_x() + width/2., height+1, "%.2f%%" % float(height), ha='center', va='center')
+        plt.text(rect.get_x() + width/2., height+1, "%.2f%%" % float(height), ha='center', va='center')
 
     plt.xticks(range(len(x)), x, size='x-small', rotation='vertical', ha='center', va='top')
     plt.tick_params(axis='y', labelsize='x-small')
@@ -202,8 +210,8 @@ def plot_communities_length_distribution(lengths, title, out):
     lengths.sort()
     x = list(range(0, len(lengths)))
     plt.plot(x, lengths, "-", linewidth=2)
-    plt.title(title, fontsize=15)
-    plt.xlabel("CommunityID", fontsize=10, labelpad=0)
+    # plt.title(title, fontsize=15)
+    plt.xlabel("Community in order of size", fontsize=10, labelpad=0)
     plt.ylabel("Community Size", fontsize=10, labelpad=0)
     plt.tick_params(axis='x', labelsize=9)
     plt.tick_params(axis='y', labelsize=9)
@@ -226,20 +234,29 @@ def plot_overlap_distribution(communities, epsilon):
                 actor_frequency[a] += 1
             else:
                 actor_frequency[a] = 1
-
+    # print sorted(actor_frequency.iteritems(), key=lambda (k, v): v, reverse=True)[:10]
     print len(actor_frequency)
+    # for actor in actor_frequency:
+    #     if actor[]
+    # for a in actor_frequency
     freq = {}
+    count_oscar = 0
     for actor in actor_frequency:
+
         right_item = "0"*(7-len(actor))+actor
+        if actors_data[right_item]["award_category"] == "Oscar":
+            count_oscar += 1
         # print right_item
-            print str(right_item) +" "+str(actor_frequency[actor])+" "+actors_data[right_item]["award_category"]+" "+actors_data[right_item]["birth date"]+" "+str(len(actors_data[right_item]["award"]))
+        if right_item in candidates_ids:
+            print actor +" "+str(actor_frequency[actor])
+        # print str(right_item) +" "+str(actor_frequency[actor])+" "+actors_data[right_item]["award_category"]+" "+actors_data[right_item]["birth date"]+" "+str(len(actors_data[right_item]["award"]))
         if actor_frequency[actor] in freq:
             freq[actor_frequency[actor]] += 1
         else:
             freq[actor_frequency[actor]] = 1
     # print freq[5]
     # print freq[4]
-    # print freq[3]
+    print "Count Oscar: "+str(count_oscar)
     freq = sorted(freq.iteritems(), key=lambda (k, v): v, reverse=True)
     x_axis = []
     y_axis = []
@@ -247,10 +264,12 @@ def plot_overlap_distribution(communities, epsilon):
         x_axis.append(key)
         y_axis.append(value)
 
-    plt.bar(x_axis, y_axis, align='center', alpha=0.6, linewidth=0)
-    plt.title("Overlap Distribution Epsilon: "+str(epsilon))
+    plt.bar(x_axis, y_axis, align='center', alpha=0.9, linewidth=0, color="#664200")
+    # plt.title("Overlap Distribution Epsilon: "+str(epsilon))
     plt.tick_params(axis='x', labelsize=9)
     plt.tick_params(axis='y', labelsize=9)
+    plt.xlabel("Frequency", fontsize=10, labelpad=0)
+    plt.ylabel("Overlap", fontsize=10, labelpad=0)
     plt.savefig(PLOT_DIRECTORY+"/overlap_distribution_"+str(epsilon)+".jpg", bbox_inches="tight")
     plt.show()
 
@@ -304,7 +323,7 @@ def evaluate_demon_attempt_by_genre(list_communities):
                 "mean_year_actor": mean_year_actor
             }
 
-            if oscar_percentage and oscar_percentage > oscar_threshold:
+            if oscar_percentage and oscar_percentage >= oscar_threshold:
                 oscar_community[community] = all_com_eps[community]
 
         out_path = RESULT_DIRECTORY+"/demon_result_"+str(epsilon)+"_"+str(min_community_size)+".csv"
@@ -318,6 +337,33 @@ def evaluate_demon_attempt_by_genre(list_communities):
         oscar_community_eps[epsilon] = oscar_community
 
     return oscar_community_eps
+
+
+def community_analysis(communities):
+    print "> numero di community: " + str(len(communities))
+    count = 0
+    actor_frequency = {}
+    for community in communities:
+        for a in communities[community]:
+            if a in actor_frequency:
+
+                actor_frequency[a] += 1
+            else:
+                actor_frequency[a] = 1
+
+    print len(actor_frequency)
+    for i in communities:
+        count += len(communities[i])
+    print "> numero totale di nodi: " + str(count)
+    print "> dimensione media di una community: " + str(count / len(communities))
+    helper = [(key, len(communities[key])) for key in communities.keys()]
+    helper.sort(key=lambda x: x[1])
+    print "> community pi piccola: " + str(helper[0][1])
+    print "> community pi grande: " + str(helper[-1][1])
+    print "> top 2 community:\n" + \
+          str(helper[-1][0]) + " (" + str(helper[-1][1]) + " nodes)\n" + \
+          str(helper[-2][0]) + " (" + str(helper[-2][1]) + " nodes)\n"
+          # str(helper[-3][0]) + " (" + str(helper[-3][1]) + " nodes)\n"
 
 
 def compute_global_statistics_DEMON_attempt(list_communities):
@@ -395,8 +441,10 @@ def compute_global_statistics_DEMON_attempt(list_communities):
 # plot_epsilon_dict(out="number_of_community_distribution", log_directory=OUTPUT_DIRECTORY)
 # list_communities = read_all_demon_directory(log_directory=OUTPUT_DIRECTORY)
 # epsilon = 0.32
-# list_communities_result = read_single_demon_result("demon_result_0.32_3.csv")
+# list_communities_result = read_single_demon_result(RESULT_DIRECTORY, "demon_result_0.32_3.csv")
 list_communities = read_single_demon_attempt(OUTPUT_DIRECTORY, "demon_actor_25_0.25_3.txt")
+
+# community_analysis(list_communities[epsilon])
 # for epsilon in list_communities:
 #     plot_communities_length_distribution(list_communities[epsilon], "Distribution community size Epsilon: "+str(epsilon), "community_size_distribution_"+str(epsilon))
 
@@ -408,33 +456,49 @@ actors_data = json.loads(file_actor)
 # epsilon = 0.32
 # list_communities = read_single_demon_attempt("demon_actor_32_"+str(epsilon)+"_3.txt")
 # print len(list_communities)
-oscar_community = evaluate_demon_attempt_by_genre(list_communities)
+# oscar_community = evaluate_demon_attempt_by_genre(list_communities)
+# print str(len(oscar_community)) +" Ciao bell"
 # horizontal_barchar(labels[epsilon])
 # plot_general_barchart(sorted(all_ponderate_purities.iteritems(), key=lambda (k, v): v), "Epsilon", "Purity", "Purity Distribution DEMON based on Actor Genre", "purity_distribution_demon_communities_on_genre", highlight=32)
 
 # Plot overlap distribution of every attempt of different parameter in community discovery
-for epsilon in oscar_community:
-    # print oscar_community[epsilon]
-    plot_overlap_distribution(oscar_community[epsilon], epsilon)
-#
-# # I read the result file of the execution of community discover algorithm
-# list_communities_result = read_all_demon_directory_result(log_directory=RESULT_DIRECTORY)
-# # now in global_statistics I have all the statistic for every parameter with I execute community discovery task (epsilon in DEMON or K in k-clique)
-# global_statistics = compute_global_statistics_DEMON_attempt(list_communities_result)
+# for epsilon in list_communities:
+#     # print oscar_community[epsilon]
+#     plot_overlap_distribution(list_communities[epsilon], epsilon)
 
+candidates_ids_file = open("oscar_candidate_id.txt")
+for l in candidates_ids_file:
+    candidates_ids = eval(l)
+# print candidates_ids
+# print candidates_ids[0]
+# sys.exit()
+# Plot overlap distribution of every attempt of different parameter in community discovery
+for epsilon in list_communities:
+    # print oscar_community[epsilon]
+    plot_overlap_distribution(list_communities[epsilon], epsilon)
+#
+# I read the result file of the execution of community discover algorithm
+# list_communities_result = read_all_demon_directory_result(log_directory=RESULT_DIRECTORY)
+# now in global_statistics I have all the statistic for every parameter with I execute community discovery task (epsilon in DEMON or K in k-clique)
+# global_statistics = compute_global_statistics_DEMON_attempt(list_communities_result)
+# horizontal_barchar(global_statistics["labels"][epsilon], "genre_distribution_community_"+str(epsilon).replace(".","_"))
 # # print on console the list of different label that describe the different communities found with a certain epsilon
 # for key, value in sorted(global_statistics["unique_labels"].iteritems(), key=lambda (k, v): len(v)):
 #     print "Epsilon: "+str(key)+" Unique Label: "+str(value)
 
-# # plotting of the average community legnth for every k
-# plot_general_barchart(sorted(global_statistics["mean_lenght"].iteritems(), key=lambda (k, v): v), "Epsilon", "Average Community length", "Arithmetic Density Distribution DEMON communities", "mean_length_distribution_demon_communities", highlight=25)
+# plotting of the average community legnth for every k
+# plot_general_barchart(sorted(global_statistics["mean_lenght"].iteritems(), key=lambda (k, v): v), "Epsilon", "Average Community length", "Arithmetic Density Distribution DEMON communities", "mean_length_distribution_demon_communities")
 #
-# # plotting of the ponderate density over every epsilon
-# plot_general_barchart(sorted(global_statistics["arithmetic_density"].iteritems(), key=lambda (k, v): v), "Epsilon", "Density", "Arithmetic Density Distribution DEMON communities", "arithmetic_density_distribution_demon_communities", highlight=25)
+# plotting of the ponderate density over every epsilon
+# print global_statistics["ponderate_purity"][0.86]
+# print global_statistics["arithmetic_density"][0.86]
+# print global_statistics["mean_lenght"][0.86]
+# print len(global_statistics["labels"][0.86])
+# plot_general_barchart(sorted(global_statistics["arithmetic_density"].iteritems(), key=lambda (k, v): v), "Epsilon", "Mean Density", "Arithmetic Density Distribution DEMON communities", "arithmetic_density_distribution_demon_communities")
 #
 # plotting of the ponderate purity over every epsilon
-# plot_general_barchart(sorted(global_statistics["ponderate_purity"].iteritems(), key=lambda (k, v): v), "Epsilon", "Purity", "Purity Distribution DEMON based on Actor Genre", "purity_distribution_demon_communities_on_genre", highlight=25)
+# plot_general_barchart(sorted(global_statistics["ponderate_purity"].iteritems(), key=lambda (k, v): v), "Epsilon", "Ponderate Mean Purity", "Purity Distribution DEMON based on Actor Genre", "purity_distribution_demon_communities_on_genre", highlight=32)
 
 # # plot the length of the different community in a specific epsilon
 # for epsilon in global_statistics["lenghts"]:
-#     plot_communities_length_distribution(global_statistics["lenghts"][epsilon], "Distribution community size Epsilon: "+str(epsilon), "community_size_distribution_"+str(epsilon))
+#     plot_communities_length_distribution(global_statistics["lenghts"][epsilon], "Distribution community size Epsilon: "+str(epsilon), "-1_community_size_distribution_"+str(epsilon))

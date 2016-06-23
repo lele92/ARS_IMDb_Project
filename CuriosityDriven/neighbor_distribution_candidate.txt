@@ -1,0 +1,22 @@
+0001451,Queen Latifah,5,{'Oscar': 0, 'Winning': 0, 'GenericNomination': 4, 'NominationOscar': 1},4,3
+0378245,Taraji P. Henson,3,{'Oscar': 0, 'Winning': 0, 'GenericNomination': 2, 'NominationOscar': 1},5,2
+0413168,Hugh Jackman,5,{'Oscar': 1, 'Winning': 0, 'GenericNomination': 3, 'NominationOscar': 1},4,2
+0000136,Johnny Depp,12,{'Oscar': 0, 'Winning': 2, 'GenericNomination': 9, 'NominationOscar': 1},3,2
+0000179,Jude Law,9,{'Oscar': 4, 'Winning': 0, 'GenericNomination': 1, 'NominationOscar': 4},3,2
+0056187,Sacha Baron Cohen,5,{'Oscar': 0, 'Winning': 0, 'GenericNomination': 4, 'NominationOscar': 1},2,2
+0001570,Edward Norton,7,{'Oscar': 1, 'Winning': 0, 'GenericNomination': 2, 'NominationOscar': 4},3,2
+0000368,Laura Dern,3,{'Oscar': 1, 'Winning': 0, 'GenericNomination': 0, 'NominationOscar': 2},3,2
+0718646,Jason Reitman,1,{'Oscar': 0, 'Winning': 1, 'GenericNomination': 0, 'NominationOscar': 0},5,3
+0350453,Jake Gyllenhaal,2,{'Oscar': 1, 'Winning': 0, 'GenericNomination': 1, 'NominationOscar': 0},3,2
+0000213,Winona Ryder,2,{'Oscar': 0, 'Winning': 0, 'GenericNomination': 1, 'NominationOscar': 1},2,2
+0316079,Paul Giamatti,6,{'Oscar': 1, 'Winning': 2, 'GenericNomination': 2, 'NominationOscar': 1},3,3
+3078932,Lady Gaga,2,{'Oscar': 0, 'Winning': 0, 'GenericNomination': 2, 'NominationOscar': 0},4,3
+0001618,Joaquin Phoenix,2,{'Oscar': 1, 'Winning': 0, 'GenericNomination': 0, 'NominationOscar': 1},3,2
+0252230,Chiwetel Ejiofor,2,{'Oscar': 0, 'Winning': 1, 'GenericNomination': 0, 'NominationOscar': 1},3,3
+0010736,Amy Adams,6,{'Oscar': 1, 'Winning': 1, 'GenericNomination': 2, 'NominationOscar': 2},3,2
+1659547,Carey Mulligan,1,{'Oscar': 0, 'Winning': 0, 'GenericNomination': 1, 'NominationOscar': 0},5,2
+0000375,Robert Downey Jr.,16,{'Oscar': 3, 'Winning': 1, 'GenericNomination': 5, 'NominationOscar': 7},3,2
+0931329,Michelle Williams,1,{'Oscar': 0, 'Winning': 0, 'GenericNomination': 1, 'NominationOscar': 0},5,2
+0290556,James Franco,34,{'Oscar': 2, 'Winning': 0, 'GenericNomination': 24, 'NominationOscar': 8},2,2
+0005028,Kate Hudson,1,{'Oscar': 0, 'Winning': 0, 'GenericNomination': 0, 'NominationOscar': 1},4,2
+1020089,Sally Hawkins,3,{'Oscar': 1, 'Winning': 1, 'GenericNomination': 1, 'NominationOscar': 0},5,2
