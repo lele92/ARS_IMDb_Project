@@ -16,9 +16,9 @@ def plot_tie_strength_vs_neighbor_overlap(graph, out):
     avg_x, avg_y = avg_points(tie_strength, neighbor_overlap)
     plt.plot(tie_strength, neighbor_overlap, ".", markersize=3, label='<O> single point')
     plt.plot(avg_x, avg_y, "rD", markersize=5, label='<O> points same Strength')
-    plt.title("Tie Strength vs Neighbor Overlap", fontsize=15)
-    plt.xlabel("Tie Strength", fontsize=10, labelpad=0)
-    plt.ylabel("Neighbor Overlap", fontsize=10, labelpad=0)
+    # plt.title("Tie Strength vs Neighbor Overlap", fontsize=15)
+    plt.xlabel("Tie Strength (Number of Collaboration)", fontsize=10, labelpad=0)
+    plt.ylabel("Neighbor Overlap <O>", fontsize=10, labelpad=0)
     plt.tick_params(axis='x', labelsize=9)
     plt.tick_params(axis='y', labelsize=9)
     # plt.loglog()
@@ -47,8 +47,8 @@ def plot_link_removing_vs_len_largest_component(data):
         link_removed.append(item[0])
         len_largest_component.append(item[1])
 
-    plt.plot(link_removed, len_largest_component, "-.", markersize=5, label='<O> single point')
-    plt.title("Removed Links vs Size of largest component", fontsize=15)
+    plt.plot(link_removed, len_largest_component, ".", markersize=5, label='<O> single point')
+    # plt.title("Removed Links vs Size of largest component", fontsize=15)
     plt.xlabel("Removed Links", fontsize=10, labelpad=0)
     plt.ylabel("Size of largest component", fontsize=10, labelpad=0)
     plt.tick_params(axis='x', labelsize=9)
@@ -75,13 +75,15 @@ def plot_link_removing_vs_len_largest_component(data_weak, data_strong, out):
         link_removed_strong.append(item[0])
         len_largest_component_strong.append(item[1])
 
-    plt.plot(link_removed_weak, len_largest_component_weak, "-", markersize=5, label='Weak tie first')
-    plt.plot(link_removed_strong, len_largest_component_strong, "r-", markersize=5, label='Strong tie first')
-    plt.title("Removed Links vs Size of largest component", fontsize=15)
+    plt.plot(link_removed_weak, len_largest_component_weak, "-", linewidth=2, label='Weak tie first')
+    plt.plot(link_removed_strong, len_largest_component_strong, "r-", linewidth=2, label='Strong tie first')
+    # plt.title("Removed Links vs Size of largest component", fontsize=15)
     plt.xlabel("Removed Links", fontsize=10, labelpad=0)
     plt.ylabel("Size of largest component", fontsize=10, labelpad=0)
     plt.tick_params(axis='x', labelsize=9)
     plt.tick_params(axis='y', labelsize=9)
+    plt.gca().yaxis.grid(True)
+    plt.gca().xaxis.grid(True)
     # plt.loglog()
     plt.legend(numpoints=1, loc=0, fontsize="x-small")
     plt.savefig(out+".jpg", bbox_inches="tight")
@@ -147,6 +149,7 @@ graph = nx.read_edgelist(path, delimiter=',', nodetype=str, data=(('weight', flo
 calculate_neighbors_overlap(graph)
 
 # cut = "_cut3"
+# cut = ""
 # path = "actor_network_weighted_overlap"+str(cut)+".csv"
 # graph = nx.read_edgelist(path, delimiter=',', nodetype=str, data=(('weight', float), ('NOverlap', float)))
 # plot_tie_strength_vs_neighbor_overlap(graph, out="Plot/tie_strength_vs_neighbor_overlap"+str(cut))
@@ -164,10 +167,13 @@ calculate_neighbors_overlap(graph)
 # strong_tie_first_removing(graph, step, cut)
 
 # cut = "_cut3"
-# step = 100
-# path_weak = "weak_tie_first_output_"+str(step)+"_"+str(cut)+".csv"
-# path_strong = "strong_tie_first_output_"+str(step)+"_"+str(cut)+".csv"
+# step = 50
+# # path_weak = "weak_tie_first_output_"+str(step)+"_"+str(cut)+".csv"
+# # path_strong = "strong_tie_first_output_"+str(step)+"_"+str(cut)+".csv"
+# path_weak = "weak_tie_first_output_"+str(step)+".csv"
+# path_strong = "strong_tie_first_output_"+str(step)+".csv"
 # weak_tie_first = open(path_weak)
 # strong_tie_first = open(path_strong)
 # # plot_link_removing_vs_len_largest_component(weak_tie_first)
-# plot_link_removing_vs_len_largest_component(weak_tie_first, strong_tie_first, out="Plot/link_removing_vs_len_largest_component"+str(cut))
+# # plot_link_removing_vs_len_largest_component(weak_tie_first, strong_tie_first, out="Plot/link_removing_vs_len_largest_component"+str(cut))
+# plot_link_removing_vs_len_largest_component(weak_tie_first, strong_tie_first, out="Plot/link_removing_vs_len_largest_component")
