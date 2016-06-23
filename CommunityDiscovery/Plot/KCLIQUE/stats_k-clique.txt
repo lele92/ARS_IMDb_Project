@@ -1,0 +1,88 @@
+########	3-CLIQUE cut4 ANALYSIS	########
+> numero di community: 77
+> numero totale di nodi: 1489
+> dimensione media di una community: 19
+> community pi? piccola: 3
+> community pi? grande: 973
+> top 2 community:
+0 (973 nodes)
+2 (68 nodes)
+> unique labels = ['Action', 'Animation', 'Comedy', 'Drama', 'Horror', 'Short']
+
+
+########	4-CLIQUE cut4 ANALYSIS	########
+> numero di community: 70
+> numero totale di nodi: 1166
+> dimensione media di una community: 16
+> community pi? piccola: 4
+> community pi? grande: 324
+> top 2 community:
+1 (324 nodes)
+0 (280 nodes)
+> unique labels = ['Action', 'Animation', 'Comedy', 'Drama', 'Horror']
+
+########	5-CLIQUE cut4 ANALYSIS	########
+> numero di community: 35
+> numero totale di nodi: 831
+> dimensione media di una community: 23
+> community pi? piccola: 5
+> community pi? grande: 278
+> top 2 community:
+1 (278 nodes)
+0 (225 nodes)
+> unique labels = ['Action', 'Animation', 'Comedy', 'Drama']
+
+########	6-CLIQUE cut4 ANALYSIS	########
+> numero di community: 16
+> numero totale di nodi: 645
+> dimensione media di una community: 40
+> community pi? piccola: 6
+> community pi? grande: 230
+> top 2 community:
+1 (230 nodes)
+0 (208 nodes)
+> unique labels = ['Action', 'Animation', 'Comedy', 'Drama']
+
+########	7-CLIQUE cut4 ANALYSIS	########
+> numero di community: 13
+> numero totale di nodi: 565
+> dimensione media di una community: 43
+> community pi? piccola: 7
+> community pi? grande: 206
+> top 2 community:
+1 (206 nodes)
+0 (194 nodes)
+> unique labels = ['Action', 'Animation', 'Comedy', 'Drama']
+
+########	8-CLIQUE cut4 ANALYSIS	########
+> numero di community: 12
+> numero totale di nodi: 520
+> dimensione media di una community: 43
+> community pi? piccola: 8
+> community pi? grande: 197
+> top 2 community:
+1 (197 nodes)
+0 (183 nodes)
+> unique labels = ['Action', 'Animation', 'Comedy', 'Drama']
+
+########	9-CLIQUE cut4 ANALYSIS	########
+> numero di community: 8
+> numero totale di nodi: 453
+> dimensione media di una community: 56
+> community pi? piccola: 9
+> community pi? grande: 184
+> top 2 community:
+1 (184 nodes)
+0 (171 nodes)
+> unique labels = ['Action', 'Animation', 'Comedy', 'Drama']
+
+########	10-CLIQUE cut4 ANALYSIS	########
+> numero di community: 9
+> numero totale di nodi: 424
+> dimensione media di una community: 47
+> community pi? piccola: 10
+> community pi? grande: 168
+> top 2 community:
+1 (168 nodes)
+0 (159 nodes)
+> unique labels = ['Animation', 'Comedy', 'Drama']
