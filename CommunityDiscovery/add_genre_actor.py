@@ -52,7 +52,7 @@ def plot_genres_distribution(g_data, title, out):
     plt.savefig(out, bbox_inches="tight")
     plt.show()
 
-path_actor = "../DATA/File_IMDb/actor_full_cleaned.json"
+path_actor = "../DATA/File_IMDb/actor_full_genre_cleaned.json"
 path_actor_film = "../DATA/Indexes/actors_film.csv"
 path_film = "../DATA/File_IMDb/film_cleaned.json"
 
@@ -87,6 +87,7 @@ for tmp in actors_data:
     actor_genres = {}
     actor_languages = {}
     actor_director = {}
+
     for film in actors_data[tmp]["film"]:
         if film in films_data:
             genres = films_data[film]["genres"]
@@ -105,13 +106,23 @@ for tmp in actors_data:
                     else:
                         actor_languages[l] = 1
             # print films_data[film]["kind"]
+
             if films_data[film]["director"] is not None and films_data[film]["kind"] not in movie_kind_not_admitted:
-                for director in films_data[film]["director"]:
-                    # print l["person_id"]
-                    if director["person_id"] in actor_director:
-                        actor_director[director["person_id"]] += 1
-                    else:
-                        actor_director[director["person_id"]] = 1
+                if "oscar_year" in actors_data[tmp]:
+                    if films_data[film]["year"] < actors_data[tmp]["oscar_year"]:
+                        for director in films_data[film]["director"]:
+                            # print l["person_id"]
+                            if director["person_id"] in actor_director:
+                                actor_director[director["person_id"]] += 1
+                            else:
+                                actor_director[director["person_id"]] = 1
+                else:
+                    for director in films_data[film]["director"]:
+                        # print l["person_id"]
+                        if director["person_id"] in actor_director:
+                            actor_director[director["person_id"]] += 1
+                        else:
+                            actor_director[director["person_id"]] = 1
         else:
             list_film.append(film)
             print film

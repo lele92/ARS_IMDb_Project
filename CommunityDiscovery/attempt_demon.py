@@ -2,7 +2,7 @@ __author__ = 'Trappola'
 __license__ = "GPL"
 __email__ = "matteo.borghi20@gmail.com"
 
-from Demon import Demon
+
 
 def find_communities_demon(network_path, epsilon_start, delta, attempt, min_community_size):
     attempt_range = range(0, attempt)
@@ -14,7 +14,7 @@ def find_communities_demon(network_path, epsilon_start, delta, attempt, min_comm
         epsilon += delta
 
 # network_path = "../DATA/Network_data_final/actor_network_cleaned.csv"
-network_path = "../DATA/Network_data_final/actor_network_cut3_awarded.csv"
+# network_path = "../DATA/Network_data_final/actor_network_cut3_awarded.csv"
 epsilon_start = 0
 delta = 0.01
 attempt = 101

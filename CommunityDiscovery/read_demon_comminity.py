@@ -13,6 +13,8 @@ min_community_size = 3
 RESULT_DIRECTORY = "Demon_Award_Result"
 # RESULT_DIRECTORY = "DEMONResults"
 OUTPUT_DIRECTORY = "OutputDemon_Award"
+OUTPUT_DIRECTORY_KCLIQUE = "OutputKCLIQUE"
+OUTPUT_DIRECTORY_LOUVAIN = "OutputLOUVAIN"
 # OUTPUT_DIRECTORY = "OutputDemon"
 GRAPH_PATH = "../DATA/Network_data_final/actor_network_cut3_awarded.csv"
 # GRAPH_PATH = "../DATA/Network_data_final/actor_network_cleaned.csv"
@@ -20,11 +22,13 @@ PLOT_DIRECTORY = "PlotAward"
 # PLOT_DIRECTORY = "Old_plot"
 PATH_ACTOR = "../DATA/File_IMDb/actor_full_genre_cleaned.json"
 
+OSCAR_TRESHOLD = 16
+
 import numpy as np
 # np.arange(0,0.6,0.01)
 # np.linspace(0,0.6,61)
 
-
+# copiata
 def read_single_file_demon_result(demon_result_path):
     f = open(demon_result_path)
     all_community_measure = {}
@@ -39,13 +43,15 @@ def read_single_file_demon_result(demon_result_path):
 
     return all_community_measure
 
-
+# copiata
 def read_demon_community(demon_path):
     f = open(demon_path)
     community = {}
     for l in f:
         u = l.rstrip().split("\t")
-        lista = u[1].strip("[]").split(", ")
+        # todo change this line for DEMON
+        # lista = u[1].strip("[]").split(", ")
+        lista = u[1].strip("[]").split(",")
         single_community = []
         for item in lista:
             single_community.append(item)
@@ -54,17 +60,17 @@ def read_demon_community(demon_path):
         # print len(community[u[0]])
     return community
 
-
+# copiata
 def read_all_demon_directory(log_directory):
     list_communities = {}
     dict_list = os.listdir(log_directory)
     dict_list.sort()
     for d in dict_list:
         # list_communities[float(d.split("_")[3])] = list(read_demon_community(log_directory + d).values())
-        list_communities[float(d.split("_")[3])] = read_demon_community(log_directory +"/"+ d)
+        list_communities[float(d.split("_")[0])] = read_demon_community(log_directory +"/"+ d)
     return list_communities
 
-
+# copiata
 def read_all_demon_directory_result(log_directory):
     list_communities = {}
     dict_list = os.listdir(log_directory)
@@ -74,20 +80,22 @@ def read_all_demon_directory_result(log_directory):
     # contains an object for every epsilon with information about every community discover
     return list_communities
 
-
+# copiata
 def read_single_demon_attempt(log_directory, path):
     list_communities = {}
-    list_communities[float(path.split("_")[3])] = read_demon_community(log_directory +"/"+ path)
+    # todo change this character for DEMON
+    list_communities[float(path.split("_")[0])] = read_demon_community(log_directory +"/"+ path)
     return list_communities
 
-
+# copiata
 def read_single_demon_result(log_directory, path):
     list_communities = {}
     list_communities[float(path.split("_")[2])] = read_single_file_demon_result(log_directory +"/"+ path)
     return list_communities
 
-
+#copiata
 def evaluate_purity_single_community(community_list, graph):
+    # print community_list
     community_label = None
     actors_genres = []
     right_community_items = []
@@ -126,7 +134,7 @@ def evaluate_purity_single_community(community_list, graph):
     return purezza, community_label[0], density, mean_birth_date, "%.2f" % percentage_birth_date, mean_year_actor, oscar_percentage
     # return purezza, data, density, mean_birth_date, "%.2f" % percentage_birth_date, mean_year_actor
 
-
+#copiata
 def horizontal_barchar(data, out):
     freq = {}
     tot_item = len(data)
@@ -152,7 +160,7 @@ def horizontal_barchar(data, out):
         width = rect.get_width()
         bar_width = height
         width = "%.2f" % width
-        plt.text(5+float(width), rect.get_y() + height/2., "%.1f%%" % float(width), ha='center', va='center', fontsize=10)
+        plt.text(5+float(width), rect.get_y() + height/2., "%.1f%%" % float(width), ha='center', va='center', fontsize=11)
     plt.tick_params(axis='x', labelsize=9)
     plt.tick_params(axis='y', labelsize=9)
     plt.axis([0, max_width + 10, -0.5, len(labels)-0.5])
@@ -221,7 +229,7 @@ def plot_communities_length_distribution(lengths, title, out):
     # plt.legend(numpoints=1, loc=0, fontsize="x-small")
     plt.show()
 
-
+#
 def plot_overlap_distribution(communities, epsilon):
     # for i in range(0,len(x)-1):
     #     if (i%5 != 0):
@@ -273,7 +281,7 @@ def plot_overlap_distribution(communities, epsilon):
     plt.savefig(PLOT_DIRECTORY+"/overlap_distribution_"+str(epsilon)+".jpg", bbox_inches="tight")
     plt.show()
 
-
+#copiata
 def plot_epsilon_dict(log_directory, out=None):
     l = {}
     dict_list = os.listdir(log_directory)
@@ -287,7 +295,7 @@ def plot_epsilon_dict(log_directory, out=None):
         freq.append(l[i])
     histogram(x, freq, "Epsilon", "Number of communities", title="Number of Communities vs Epsilon DEMON", out=out)
 
-
+#copiata
 def evaluate_demon_attempt_by_genre(list_communities):
 
     # path = "../DATA/Network_data_final/actor_network_cleaned.csv"
@@ -302,9 +310,8 @@ def evaluate_demon_attempt_by_genre(list_communities):
         labels = []
         total_length = 0
         all_com_eps = list_communities[epsilon]
-
         oscar_community = {}
-        oscar_threshold = 20
+
 
         for community in all_com_eps:
             # print community
@@ -323,7 +330,7 @@ def evaluate_demon_attempt_by_genre(list_communities):
                 "mean_year_actor": mean_year_actor
             }
 
-            if oscar_percentage and oscar_percentage >= oscar_threshold:
+            if oscar_percentage and oscar_percentage >= OSCAR_TRESHOLD:
                 oscar_community[community] = all_com_eps[community]
 
         out_path = RESULT_DIRECTORY+"/demon_result_"+str(epsilon)+"_"+str(min_community_size)+".csv"
@@ -365,7 +372,7 @@ def community_analysis(communities):
           str(helper[-2][0]) + " (" + str(helper[-2][1]) + " nodes)\n"
           # str(helper[-3][0]) + " (" + str(helper[-3][1]) + " nodes)\n"
 
-
+# copiata
 def compute_global_statistics_DEMON_attempt(list_communities):
 
     all_ponderate_density = {}
@@ -442,7 +449,9 @@ def compute_global_statistics_DEMON_attempt(list_communities):
 # list_communities = read_all_demon_directory(log_directory=OUTPUT_DIRECTORY)
 # epsilon = 0.32
 # list_communities_result = read_single_demon_result(RESULT_DIRECTORY, "demon_result_0.32_3.csv")
-list_communities = read_single_demon_attempt(OUTPUT_DIRECTORY, "demon_actor_25_0.25_3.txt")
+# list_communities = read_single_demon_attempt(OUTPUT_DIRECTORY, "demon_actor_25_0.25_3.txt")
+# list_communities = read_single_demon_attempt(OUTPUT_DIRECTORY_KCLIQUE, "4_clique_cut3.txt")
+list_communities = read_single_demon_attempt(OUTPUT_DIRECTORY_LOUVAIN, "3_louvain_cut3.txt")
 
 # community_analysis(list_communities[epsilon])
 # for epsilon in list_communities:
@@ -451,20 +460,16 @@ list_communities = read_single_demon_attempt(OUTPUT_DIRECTORY, "demon_actor_25_0
 # path_actor = "../DATA/File_IMDb/actor_full_genre_cleaned.json"
 file_actor = open(PATH_ACTOR).read()
 actors_data = json.loads(file_actor)
-
+# print len(list_communities[4.0])
 # list_communities = read_all_demon_directory()
 # epsilon = 0.32
 # list_communities = read_single_demon_attempt("demon_actor_32_"+str(epsilon)+"_3.txt")
 # print len(list_communities)
-# oscar_community = evaluate_demon_attempt_by_genre(list_communities)
-# print str(len(oscar_community)) +" Ciao bell"
+oscar_community = evaluate_demon_attempt_by_genre(list_communities)
+
 # horizontal_barchar(labels[epsilon])
 # plot_general_barchart(sorted(all_ponderate_purities.iteritems(), key=lambda (k, v): v), "Epsilon", "Purity", "Purity Distribution DEMON based on Actor Genre", "purity_distribution_demon_communities_on_genre", highlight=32)
 
-# Plot overlap distribution of every attempt of different parameter in community discovery
-# for epsilon in list_communities:
-#     # print oscar_community[epsilon]
-#     plot_overlap_distribution(list_communities[epsilon], epsilon)
 
 candidates_ids_file = open("oscar_candidate_id.txt")
 for l in candidates_ids_file:
@@ -472,10 +477,16 @@ for l in candidates_ids_file:
 # print candidates_ids
 # print candidates_ids[0]
 # sys.exit()
+
+# # Plot overlap distribution of every attempt of different parameter in community discovery
+# for epsilon in list_communities:
+#     # print oscar_community[epsilon]
+#     plot_overlap_distribution(list_communities[epsilon], epsilon)
+
 # Plot overlap distribution of every attempt of different parameter in community discovery
-for epsilon in list_communities:
-    # print oscar_community[epsilon]
-    plot_overlap_distribution(list_communities[epsilon], epsilon)
+for epsilon in oscar_community:
+    print "Numero di Community del Successo: "+str(len(oscar_community[epsilon]))
+    plot_overlap_distribution(oscar_community[epsilon], epsilon)
 #
 # I read the result file of the execution of community discover algorithm
 # list_communities_result = read_all_demon_directory_result(log_directory=RESULT_DIRECTORY)

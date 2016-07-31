@@ -245,7 +245,11 @@ class Demon(object):
             # print len(communities)
 
             for test_community in communities.items():
-
+                # print test_community
+                # print actual_community
+                # print test_community[0]
+                # print self.epsilon
+                # sys.exit()
                 union = self.__generalized_inclusion(actual_community, test_community[0])
 
                 # community to merge with found!
@@ -280,6 +284,11 @@ class Demon(object):
         if res >= self.epsilon:  # at least e% of similarity wrt the smallest set
             union = set(c2) | set(c1)
             return union
+        # else:
+        #     print res
+        #     print float(len(intersection))
+        #     print "non fondiamo nulla qui bel ;)"
+        #     sys.exit()
         return None
 
 # if __name__ == "__main__":

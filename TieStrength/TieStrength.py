@@ -1,4 +1,7 @@
-__author__ = 'Trappola'
+# -*- coding: utf-8 -*-
+__author__ = 'Matteo Borghi, Raffaele Giannella'
+__license__ = "GPL"
+__email__ = "matteo.borghi20@gmail.com, raph.giannella@gmail.com"
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -28,13 +31,13 @@ def plot_tie_strength_vs_neighbor_overlap(graph, out):
 
 
 def avg_points(x, y):
-    xbins = np.unique(x).tolist()                                # valori unici di degree (asse x)
+    xbins = np.unique(x).tolist()
     xbins.sort()
-    xbins.append(max(xbins)+1)                                   # barbatrucco per avere l'ultimo bin
-    n, bin_edgesX = np.histogram(x, bins=xbins)                  # n = lista con numero di punti per ogni bin ( => per ogni valore delle ascisse)
-    sum_y, bin_edgesY = np.histogram(x, bins=xbins, weights=y)   # sum_y = lista con somma dei valori Y per ogni bin
-    y_avg_values = sum_y / n                                     # valore Y medio per ogni bin ( => valori ordinate medi)
-    xbins = np.unique(x).tolist()                                # per togliere ultimo bin aggiunto inizialmente (barbatrucco)
+    xbins.append(max(xbins)+1)
+    n, bin_edgesX = np.histogram(x, bins=xbins)
+    sum_y, bin_edgesY = np.histogram(x, bins=xbins, weights=y)
+    y_avg_values = sum_y / n
+    xbins = np.unique(x).tolist()
     return xbins, y_avg_values
 
 
@@ -111,12 +114,14 @@ def calculate_neighbors_overlap(graph):
     out_file = open("actor_network_weighted_overlap.csv", "w")
     nx.write_edgelist(graph, out_file, delimiter=",", data=('weight', 'NOverlap'))
 
+
 # procedure to eliminate weak link first
-def weak_tie_first_removing(graph, step, cut):
+def removing_weak_tie_first(graph, step, cut):
     weak_tie_first_output = "weak_tie_first_output_"+str(step)+"_"+str(cut)+".csv"
     out_weak = open(weak_tie_first_output, "w")
     count_link_removed = 0
-    for o, d, data in sorted(graph.edges(data=True), key=lambda (a, b, data): (data['weight'], data['NOverlap'])):
+    # for o, d, data in sorted(graph.edges(data=True), key=lambda (a, b, data): (data['NOverlap'])):
+    for o, d, data in sorted(graph.edges(data=True), key=lambda (a, b, data): (data['NOverlap'])):
         graph.remove_edge(o, d)
         # print data["weight"]
         count_link_removed += 1
@@ -129,11 +134,13 @@ def weak_tie_first_removing(graph, step, cut):
     out_weak.close()
 
 
-def strong_tie_first_removing(graph, step, cut):
+# procedure to eliminate strong link first
+def removing_strong_tie_first(graph, step, cut):
     strong_tie_first_output = "strong_tie_first_output_"+str(step)+"_"+str(cut)+".csv"
     strong_weak = open(strong_tie_first_output, "w")
     count_link_removed = 0
-    for o, d, data in sorted(graph.edges(data=True), key=lambda (a, b, data): (data['weight'], data['NOverlap']), reverse=True):
+    # for o, d, data in sorted(graph.edges(data=True), key=lambda (a, b, data): (data['weight'], data['NOverlap']), reverse=True):
+    for o, d, data in sorted(graph.edges(data=True), key=lambda (a, b, data): (data['NOverlap']), reverse=True):
         graph.remove_edge(o, d)
         count_link_removed += 1
         if count_link_removed % step == 0:
@@ -144,9 +151,10 @@ def strong_tie_first_removing(graph, step, cut):
             strong_weak.flush()
     strong_weak.close()
 
-path = "../DATA/Network_data_final/actor_network_weighted.csv"
-graph = nx.read_edgelist(path, delimiter=',', nodetype=str, data=(('weight', float),))
-calculate_neighbors_overlap(graph)
+
+# path = "../DATA/Network_data_final/actor_network_weighted.csv"
+# graph = nx.read_edgelist(path, delimiter=',', nodetype=str, data=(('weight', float),))
+# calculate_neighbors_overlap(graph)
 
 # cut = "_cut3"
 # cut = ""
@@ -155,25 +163,31 @@ calculate_neighbors_overlap(graph)
 # plot_tie_strength_vs_neighbor_overlap(graph, out="Plot/tie_strength_vs_neighbor_overlap"+str(cut))
 
 # cut = "_cut3"
+# cut = ""
 # path = "actor_network_weighted_overlap"+str(cut)+".csv"
 # graph = nx.read_edgelist(path, delimiter=',', nodetype=str, data=(('weight', float), ('NOverlap', float)))
+# print len(graph.nodes())
+# print len(graph.edges())
 # step = 100
-# weak_tie_first_removing(graph, step, cut)
+# removing_weak_tie_first(graph, step, cut)
 
 # cut = "_cut3"
+# cut = ""
 # path = "actor_network_weighted_overlap"+str(cut)+".csv"
 # graph = nx.read_edgelist(path, delimiter=',', nodetype=str, data=(('weight', float), ('NOverlap', float)))
+# print len(graph.nodes())
+# print len(graph.edges())
 # step = 100
-# strong_tie_first_removing(graph, step, cut)
+# removing_strong_tie_first(graph, step, cut)
 
 # cut = "_cut3"
-# step = 50
-# # path_weak = "weak_tie_first_output_"+str(step)+"_"+str(cut)+".csv"
-# # path_strong = "strong_tie_first_output_"+str(step)+"_"+str(cut)+".csv"
+cut = ""
+step = 100
+path_weak = "weak_tie_first_output_"+str(step)+"_"+str(cut)+".csv"
+path_strong = "strong_tie_first_output_"+str(step)+"_"+str(cut)+".csv"
 # path_weak = "weak_tie_first_output_"+str(step)+".csv"
 # path_strong = "strong_tie_first_output_"+str(step)+".csv"
-# weak_tie_first = open(path_weak)
-# strong_tie_first = open(path_strong)
-# # plot_link_removing_vs_len_largest_component(weak_tie_first)
-# # plot_link_removing_vs_len_largest_component(weak_tie_first, strong_tie_first, out="Plot/link_removing_vs_len_largest_component"+str(cut))
-# plot_link_removing_vs_len_largest_component(weak_tie_first, strong_tie_first, out="Plot/link_removing_vs_len_largest_component")
+weak_tie_first = open(path_weak)
+strong_tie_first = open(path_strong)
+
+plot_link_removing_vs_len_largest_component(weak_tie_first, strong_tie_first, out="Plot/link_removing_vs_len_largest_component_NO_ordering"+str(cut))
